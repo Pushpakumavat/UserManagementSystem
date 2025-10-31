@@ -1,34 +1,21 @@
 package com.usermanagement.entity;
 
-
-import javax.persistence.*;
-import java.util.Set;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Roles")
-
 public class Role {
-	
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int roleId;
+    private int role_id;
 
-    @Column(unique = true)
-    private String roleName;
-
+    private String role_name;
     private String description;
 
-    @ManyToMany(mappedBy = "roles")
-    private Set<User> users;
-
-    @ManyToMany
-    @JoinTable(
-        name = "Role_Permissions",
-        joinColumns = @JoinColumn(name = "role_id"),
-        inverseJoinColumns = @JoinColumn(name = "permission_id")
-    )
-    private Set<Permission> permissions;
-
-    // Getters and Setters
-
+    public int getRole_id() { return role_id; }
+    public void setRole_id(int role_id) { this.role_id = role_id; }
+    public String getRole_name() { return role_name; }
+    public void setRole_name(String role_name) { this.role_name = role_name; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }
