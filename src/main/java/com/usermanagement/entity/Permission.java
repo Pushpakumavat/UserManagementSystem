@@ -1,21 +1,63 @@
 package com.usermanagement.entity;
 
 import jakarta.persistence.*;
+import java.util.Set;
 
 @Entity
-@Table(name = "Permissions")
+@Table(name = "permissions")
 public class Permission {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int permission_id;
+    @Column(name = "permission_id")
+    private int permissionId;
 
-    private String permission_name;
+    @Column(name = "permission_name", nullable = false, unique = true)
+    private String permissionName;
+
+    @Column(name = "description")
     private String description;
 
-    public int getPermission_id() { return permission_id; }
-    public void setPermission_id(int permission_id) { this.permission_id = permission_id; }
-    public String getPermission_name() { return permission_name; }
-    public void setPermission_name(String permission_name) { this.permission_name = permission_name; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    @ManyToMany(mappedBy = "permissions")
+    private Set<Role> roles;
+
+    public Permission() {}
+
+    public Permission(String permissionName, String description) {
+        this.permissionName = permissionName;
+        this.description = description;
+    }
+
+    // Getters and setters
+    public int getPermissionId() {
+        return permissionId;
+    }
+
+    public void setPermissionId(int permissionId) {
+        this.permissionId = permissionId;
+    }
+
+    public String getPermissionName() {
+        return permissionName;
+    }
+
+    public void setPermissionName(String permissionName) {
+        this.permissionName = permissionName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
 }

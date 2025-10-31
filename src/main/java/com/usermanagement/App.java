@@ -1,7 +1,9 @@
 package com.usermanagement;
 
-import com.usermanagement.dao.AdminDAO;
-import com.usermanagement.entity.Admin;
+import com.usermanagement.dao.*;
+import com.usermanagement.entity.Role;
+import com.usermanagement.util.HibernateUtil;
+
 import java.util.List;
 import java.util.Scanner;
 
@@ -9,66 +11,199 @@ public class App {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         AdminDAO adminDAO = new AdminDAO();
-        int choice;
+        UserDAO userDAO = new UserDAO();
+        RoleDAO roleDAO = new RoleDAO();
+        PermissionDAO permissionDAO = new PermissionDAO();
 
-        do {
+        while (true) {
             System.out.println("\n=== USER MANAGEMENT SYSTEM ===");
+            System.out.println("1. Admin Management");
+            System.out.println("2. User Management");
+            System.out.println("3. Role Management");
+            System.out.println("4. Permission Management");
+            System.out.println("5. Exit");
+            System.out.print("Enter choice: ");
+            int choice = Integer.parseInt(sc.nextLine());
+
+            switch (choice) {
+                case 1:
+                    adminMenu(adminDAO, sc);
+                    break;
+                case 2:
+                    userMenu(userDAO, sc);
+                    break;
+                case 3:
+                    roleMenu(roleDAO, sc);
+                    break;
+                case 4:
+                    permissionMenu(permissionDAO, sc);
+                    break;
+                case 5:
+                    System.out.println("👋 Exiting...");
+                    HibernateUtil.shutdown();
+                    sc.close();
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("❌ Invalid choice!");
+            }
+        }
+    }
+
+    private static void adminMenu(AdminDAO dao, Scanner sc) {
+        while (true) {
+            System.out.println("\n=== ADMIN MANAGEMENT ===");
             System.out.println("1. Add Admin");
             System.out.println("2. View All Admins");
             System.out.println("3. Update Admin");
             System.out.println("4. Delete Admin");
-            System.out.println("5. Exit");
+            System.out.println("5. Back");
             System.out.print("Enter choice: ");
-            choice = sc.nextInt();
-            sc.nextLine();
+            int choice = Integer.parseInt(sc.nextLine());
+            switch (choice) {
+                case 1:
+                    dao.addAdmin(sc);
+                    break;
+                case 2:
+                    dao.viewAdmins();
+                    break;
+                case 3:
+                    dao.updateAdmin(sc);
+                    break;
+                case 4:
+                    dao.deleteAdmin(sc);
+                    break;
+                case 5:
+                    return;
+                default:
+                    System.out.println("❌ Invalid choice!");
+            }
+        }
+    }
+
+    private static void userMenu(UserDAO dao, Scanner sc) {
+        while (true) {
+            System.out.println("\n=== USER MANAGEMENT ===");
+            System.out.println("1. Add User");
+            System.out.println("2. View All Users");
+            System.out.println("3. Update User");
+            System.out.println("4. Delete User");
+            System.out.println("5. Back");
+            System.out.print("Enter choice: ");
+            int choice = Integer.parseInt(sc.nextLine());
+            switch (choice) {
+                case 1:
+                    dao.addUser(sc);
+                    break;
+                case 2:
+                    dao.viewUsers();
+                    break;
+                case 3:
+                    dao.updateUser(sc);
+                    break;
+                case 4:
+                    dao.deleteUser(sc);
+                    break;
+                case 5:
+                    return;
+                default:
+                    System.out.println("❌ Invalid choice!");
+            }
+        }
+    }
+
+    private static void roleMenu(RoleDAO roleDao, Scanner sc) {
+        while (true) {
+            System.out.println("\n=== ROLE MANAGEMENT ===");
+            System.out.println("1. Add Role");
+            System.out.println("2. View All Roles");
+            System.out.println("3. Update Role");
+            System.out.println("4. Delete Role");
+            System.out.println("5. Back");
+            System.out.print("Enter choice: ");
+            int choice = Integer.parseInt(sc.nextLine());
 
             switch (choice) {
                 case 1:
-                    Admin a = new Admin();
-                    System.out.print("Enter Name: ");
-                    a.setName(sc.nextLine());
-                    System.out.print("Enter Email: ");
-                    a.setEmail(sc.nextLine());
-                    System.out.print("Enter Password: ");
-                    a.setPassword(sc.nextLine());
-                    adminDAO.saveAdmin(a);
-                    System.out.println("✅ Admin Added!");
+                    System.out.print("Enter role name: ");
+                    String name = sc.nextLine();
+                    System.out.print("Enter description: ");
+                    String desc = sc.nextLine();
+                    Role newRole = new Role(name, desc);
+                    if (roleDao.addRole(newRole))
+                        System.out.println("✅ Role added successfully!");
+                    else
+                        System.out.println("❌ Failed to add role!");
                     break;
-
                 case 2:
-                    List<Admin> admins = adminDAO.getAllAdmins();
-                    admins.forEach(ad -> System.out.println(ad.getAdmin_id() + " - " + ad.getName() + " (" + ad.getEmail() + ")"));
+                    List<Role> roles = roleDao.getAllRoles();
+                    System.out.println("\n=== ALL ROLES ===");
+                    if (roles != null && !roles.isEmpty()) {
+                        for (Role r : roles) {
+                            System.out.println("ID: " + r.getRoleId() +
+                                    " | Name: " + r.getRoleName() +
+                                    " | Description: " + r.getDescription());
+                        }
+                    } else {
+                        System.out.println("⚠️ No roles found!");
+                    }
                     break;
-
                 case 3:
-                    System.out.print("Enter Admin ID to Update: ");
-                    int uid = sc.nextInt(); sc.nextLine();
-                    Admin adminToUpdate = new Admin();
-                    adminToUpdate.setAdmin_id(uid);
-                    System.out.print("New Name: ");
-                    adminToUpdate.setName(sc.nextLine());
-                    System.out.print("New Email: ");
-                    adminToUpdate.setEmail(sc.nextLine());
-                    System.out.print("New Password: ");
-                    adminToUpdate.setPassword(sc.nextLine());
-                    adminDAO.updateAdmin(adminToUpdate);
-                    System.out.println("✅ Admin Updated!");
+                    System.out.print("Enter Role ID to update: ");
+                    int updateId = Integer.parseInt(sc.nextLine());
+                    System.out.print("Enter new role name: ");
+                    String newName = sc.nextLine();
+                    System.out.print("Enter new description: ");
+                    String newDesc = sc.nextLine();
+                    if (roleDao.updateRole(updateId, newName, newDesc))
+                        System.out.println("✅ Role updated successfully!");
+                    else
+                        System.out.println("❌ Failed to update role!");
                     break;
-
                 case 4:
-                    System.out.print("Enter Admin ID to Delete: ");
-                    int did = sc.nextInt();
-                    adminDAO.deleteAdmin(did);
-                    System.out.println("✅ Admin Deleted!");
+                    System.out.print("Enter Role ID to delete: ");
+                    int deleteId = Integer.parseInt(sc.nextLine());
+                    if (roleDao.deleteRole(deleteId))
+                        System.out.println("✅ Role deleted successfully!");
+                    else
+                        System.out.println("❌ Failed to delete role!");
                     break;
-
                 case 5:
-                    System.out.println("👋 Exiting...");
-                    break;
-
+                    return;
                 default:
-                    System.out.println("❌ Invalid Choice!");
+                    System.out.println("⚠️ Invalid choice!");
             }
-        } while (choice != 5);
+        }
+    }
+
+    private static void permissionMenu(PermissionDAO dao, Scanner sc) {
+        while (true) {
+            System.out.println("\n=== PERMISSION MANAGEMENT ===");
+            System.out.println("1. Add Permission");
+            System.out.println("2. View All Permissions");
+            System.out.println("3. Update Permission");
+            System.out.println("4. Delete Permission");
+            System.out.println("5. Back");
+            System.out.print("Enter choice: ");
+            int choice = Integer.parseInt(sc.nextLine());
+            switch (choice) {
+                case 1:
+                    dao.addPermission(sc);
+                    break;
+                case 2:
+                    dao.viewPermissions();
+                    break;
+                case 3:
+                    dao.updatePermission(sc);
+                    break;
+                case 4:
+                    dao.deletePermission(sc);
+                    break;
+                case 5:
+                    return;
+                default:
+                    System.out.println("❌ Invalid choice!");
+            }
+        }
     }
 }

@@ -4,69 +4,75 @@ import com.usermanagement.entity.Role;
 import com.usermanagement.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
 import java.util.List;
 
 public class RoleDAO {
 
-    public void saveRole(Role role) {
-        Transaction tx = null;
+    // ➕ Add Role
+    public boolean addRole(Role role) {
+        Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
+            transaction = session.beginTransaction();
             session.save(role);
-            tx.commit();
-            System.out.println("✅ Role saved successfully!");
+            transaction.commit();
+            return true;
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (transaction != null) transaction.rollback();
             e.printStackTrace();
+            return false;
         }
     }
 
-    public void updateRole(Role role) {
-        Transaction tx = null;
+    // 📜 View All Roles
+    public List<Role> getAllRoles() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
-            session.update(role);
-            tx.commit();
-            System.out.println("✅ Role updated successfully!");
+            Query<Role> query = session.createQuery("from Role", Role.class);
+            return query.list();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
             e.printStackTrace();
+            return null;
         }
     }
 
-    public void deleteRole(int roleId) {
-        Transaction tx = null;
+    // ✏️ Update Role
+    public boolean updateRole(int roleId, String newName, String newDescription) {
+        Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
+            transaction = session.beginTransaction();
+            Role role = session.get(Role.class, roleId);
+            if (role != null) {
+                role.setRoleName(newName);
+                role.setDescription(newDescription);
+                session.update(role);
+                transaction.commit();
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ❌ Delete Role
+    public boolean deleteRole(int roleId) {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
             Role role = session.get(Role.class, roleId);
             if (role != null) {
                 session.delete(role);
-                System.out.println("🗑️ Role deleted successfully!");
-            } else {
-                System.out.println("⚠️ Role not found!");
+                transaction.commit();
+                return true;
             }
-            tx.commit();
+            return false;
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (transaction != null) transaction.rollback();
             e.printStackTrace();
-        }
-    }
-
-    public Role getRoleById(int roleId) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.get(Role.class, roleId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public List<Role> getAllRoles() {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery("from Role", Role.class).list();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            return false;
         }
     }
 }
